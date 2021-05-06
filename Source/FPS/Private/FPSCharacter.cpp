@@ -15,7 +15,7 @@ AFPSCharacter::AFPSCharacter()
 	CameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight));
 	CameraComponent->bUsePawnControlRotation = true;
-	
+
 	GetMesh()->SetupAttachment(CameraComponent);
 	GetMesh()->bCastDynamicShadow = false;
 
@@ -26,7 +26,6 @@ AFPSCharacter::AFPSCharacter()
 
 	MaxBulletsCount = 6;
 	BulletsCount = MaxBulletsCount;
-	
 }
 
 // Called when the game starts or when spawned
@@ -34,19 +33,18 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GunSkeletalMeshComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("WeaponPoint"));
+	GunSkeletalMeshComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale,
+	                                            TEXT("WeaponPoint"));
 
 	HUD = CreateWidget<UHUDWidget>(GetWorld(), HUDClass);
 	HUD->AddToViewport();
 	HUD->SetBullet(BulletsCount);
-	
 }
 
 // Called every frame
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -60,7 +58,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAxis("Turn", this, &AFPSCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPSCharacter::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed,this, &AFPSCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 }
 
 void AFPSCharacter::MoveForward(float value)
@@ -77,11 +75,11 @@ void AFPSCharacter::MoveRight(float value)
 
 void AFPSCharacter::Fire()
 {
-	if(BulletsCount > 0)
+	if (BulletsCount > 0)
 	{
 		check(ProjectileClass != nullptr)
 
-			FVector CameraLocation;
+		FVector CameraLocation;
 		FRotator CameraRotation;
 		GetActorEyesViewPoint(CameraLocation, CameraRotation);
 
@@ -92,15 +90,15 @@ void AFPSCharacter::Fire()
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		SpawnParameters.Instigator = GetInstigator();
 
-		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, CameraRotation, SpawnParameters);
-		if(Projectile)
+		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, CameraRotation,
+		                                                              SpawnParameters);
+		if (Projectile)
 		{
 			Projectile->FireInDirection(CameraRotation.Vector());
 			BulletsCount--;
 			HUD->SetBullet(BulletsCount);
 		}
 	}
-	
 }
 
 void AFPSCharacter::ChangeFireType()

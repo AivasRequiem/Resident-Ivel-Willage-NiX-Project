@@ -10,13 +10,14 @@ AProjectile::AProjectile()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	CollisionComponent->InitSphereRadius(15.0f);
 	RootComponent = CollisionComponent;
 
-	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(
+		TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 	ProjectileMovementComponent->InitialSpeed = 1000.0f;
 	ProjectileMovementComponent->MaxSpeed = 1000.0f;
@@ -32,15 +33,12 @@ AProjectile::AProjectile()
 
 	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 	CollisionComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
-
-	
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
@@ -62,19 +60,22 @@ void AProjectile::Tick(float DeltaTime)
 	{
 		X += DeltaTime;
 		const float Formula = X * sin(4 * X) / 2;
-		//const FVector NextPoint = FVector(Direction.X , Direction.Y, X * sin(4 * X) / 2 + Direction.Z);
-		const FVector NextPoint = FVector((Formula *  Direction.X * Direction.Z + Direction.X) ,
+		//
+		//here is 2 variants of realisation of trajectory, i don't know which is better
+		//
+		const FVector NextPoint = FVector(Direction.X , Direction.Y, Formula + Direction.Z);
+		/*const FVector NextPoint = FVector((Formula *  Direction.X * Direction.Z + Direction.X) ,
 		                                  Formula * Direction.Y * Direction.Z + Direction.Y,
-		                                  Formula * (1 - Direction.Z) + Direction.Z);
+		                                  Formula * (1 - Direction.Z) + Direction.Z);*/
 		ProjectileMovementComponent->Velocity = NextPoint * ProjectileMovementComponent->InitialSpeed;
 	}
 	Super::Tick(DeltaTime);
-
 }
 
 void AProjectile::FireInDirection(const FVector& StartDirection)
 {
 	AFPSCharacter* FPSCharacter = Cast<AFPSCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//set trajectory for projectile
 	bSinFireForBullet = FPSCharacter->bSinFire;
 	Direction = StartDirection;
 	X = 0;
